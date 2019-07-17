@@ -53,6 +53,6 @@
       test-plan))
 
   (post-run [test-plan]
-    (if (and (::randomize? test-plan) (result/failed? test-plan))
+    (if (and (::randomize? test-plan))
       (print "\nRandomized with --seed" (::seed test-plan)))
     test-plan))
