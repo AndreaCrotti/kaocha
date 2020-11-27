@@ -3,9 +3,7 @@
   (:require [clojure.string :as str]
             [clojure.test :as t]
             [kaocha.core-ext :refer :all]
-            [kaocha.hierarchy :as hierarchy]
             [kaocha.plugin :as plugin]
-            [kaocha.report :as report]
             [kaocha.testable :as testable]))
 
 (defn- test-file-and-line [stacktrace test-fn]

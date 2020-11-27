@@ -56,8 +56,7 @@
         plugins))
 
 (defn normalize [config]
-  (let [default-config (default-config)
-        {:keys [tests
+  (let [{:keys [tests
                 plugins
                 reporter
                 color?
@@ -139,7 +138,7 @@
         (if-let [ns (namespace reporter)]
           (require (symbol ns))
           (throw+ {:kaocha/reporter-not-found reporter}))
-        (catch java.io.FileNotFoundException e
+        (catch java.io.FileNotFoundException _e
           (throw+ {:kaocha/reporter-not-found reporter})))
       (if-let [resolved (resolve reporter)]
         (resolve-reporter @resolved)
@@ -166,7 +165,7 @@
             (try
               ;; already loaded
               [(find-var k) v]
-              (catch java.lang.IllegalArgumentException e
+              (catch java.lang.IllegalArgumentException _e
                 (try
                   ;; not loaded yet, try to load
                   (when-let [ns (namespace k)]

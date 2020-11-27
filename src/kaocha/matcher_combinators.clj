@@ -1,7 +1,6 @@
 (ns kaocha.matcher-combinators
   (:require [kaocha.report :as report]
             [kaocha.output :as output]
-            [kaocha.hierarchy :as hierarchy]
             [clojure.test :as t]
             [lambdaisland.deep-diff :as ddiff]
             [lambdaisland.deep-diff.printer :as printer]

@@ -1,7 +1,7 @@
 (ns kaocha.plugin
   (:require [kaocha.output :as output]
             [clojure.string :as str]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [slingshot.slingshot :refer [throw+]]))
 
 (def ^:dynamic *current-chain* [])
 
@@ -13,7 +13,7 @@
   (try
     (require n)
     true
-    (catch java.io.FileNotFoundException e
+    (catch java.io.FileNotFoundException _e
       false)))
 
 (defn try-load-third-party-lib [plugin-name]
@@ -23,9 +23,9 @@
     (try-require (symbol (name plugin-name)))))
 
 (defmulti -register "Add your plugin to the stack"
-  (fn [name plugins] name))
+  (fn [name _plugins] name))
 
-(defmethod -register :default [name plugins]
+(defmethod -register :default [name _plugins]
   (output/error "Couldn't load plugin " name)
   (throw+ {:kaocha/early-exit 254} nil (str "Couldn't load plugin " name)))
 

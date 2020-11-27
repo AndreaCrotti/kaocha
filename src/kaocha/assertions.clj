@@ -3,8 +3,7 @@
             [clojure.test :as t]
             [kaocha.report :as report]
             [puget.color :as color]
-            [clojure.string :as str]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [clojure.string :as str]))
 
 (defmethod t/assert-expr 'substring? [msg form]
   (let [[_ s1 s2] form]
@@ -32,7 +31,7 @@
                (fn [s]
                  (output/colored :red-bg s))))
 
-(defmethod report/print-expr 'substring? [{:keys [expected] :as m}]
+(defmethod report/print-expr 'substring? [{:keys [expected]}]
   (let [[_ s1 s2] expected
         long-sub (longest-substring s1 s2)
         remainder (subs s1 (count long-sub))

@@ -98,7 +98,6 @@
             [slingshot.slingshot :refer [throw+]]
             [clojure.string :as str]
             [kaocha.history :as history]
-            [kaocha.testable :as testable]
             [kaocha.hierarchy :as hierarchy]
             [kaocha.jit :refer [jit]]))
 

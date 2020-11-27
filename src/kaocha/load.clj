@@ -1,11 +1,9 @@
 (ns kaocha.load
   (:refer-clojure :exclude [symbol])
   (:require [kaocha.core-ext :refer :all]
-            [kaocha.classpath :as classpath]
             [kaocha.testable :as testable]
             [clojure.java.io :as io]
-            [lambdaisland.tools.namespace.find :as ctn-find]
-            [kaocha.output :as output]))
+            [lambdaisland.tools.namespace.find :as ctn-find]))
 
 (set! *warn-on-reflection* true)
 

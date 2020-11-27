@@ -5,7 +5,6 @@
             [kaocha.history :as history]
             [kaocha.output :as output]
             [kaocha.plugin :as plugin]
-            [kaocha.report :as report]
             [kaocha.result :as result]
             [kaocha.stacktrace :as stacktrace]
             [kaocha.testable :as testable]
@@ -25,7 +24,7 @@
 (defmacro ^{:author "Colin Jones"} set-signal-handler!
   [signal f]
   (if (try (Class/forName "sun.misc.Signal")
-           (catch Throwable e))
+           (catch Throwable _e))
     `(try
        (sun.misc.Signal/handle
         (sun.misc.Signal. ~signal)
@@ -94,54 +93,54 @@
                   history/*history*       history
                   output/*colored-output* color?]
           (with-bindings (config/binding-map config)
-            (let [config (resolve-reporter config)]
-              (let [test-plan (test-plan config)]
-                (when (empty? (:kaocha.test-plan/tests test-plan))
-                  (output/warn (str "No tests were found, make sure :test-paths and "
-                                    ":ns-patterns are configured correctly in tests.edn."))
-                  (throw+ {:kaocha/early-exit 0}))
+            (let [config (resolve-reporter config)
+                  test-plan (test-plan config)]
+              (when (empty? (:kaocha.test-plan/tests test-plan))
+                (output/warn (str "No tests were found, make sure :test-paths and "
+                                  ":ns-patterns are configured correctly in tests.edn."))
+                (throw+ {:kaocha/early-exit 0}))
 
-                (when (find-ns 'matcher-combinators.core)
-                  (require 'kaocha.matcher-combinators))
+              (when (find-ns 'matcher-combinators.core)
+                (require 'kaocha.matcher-combinators))
 
-                ;; The load stage adds directories to the classpath, so at this
-                ;; point all vars that are being bound need to exist, if not we
-                ;; throw.
-                (with-bindings (config/binding-map config :throw-errors)
-                  (with-reporter (:kaocha/reporter test-plan)
-                    (let [on-exit (fn []
-                                    (try
-                                      ;; Force reset printing to stdout, since we
-                                      ;; don't know where in the process we've
-                                      ;; been interrupted, output capturing may
-                                      ;; still be in effect.
-                                      (System/setOut
-                                       (java.io.PrintStream.
-                                        (java.io.BufferedOutputStream.
-                                         (java.io.FileOutputStream. java.io.FileDescriptor/out))))
-                                      (binding [history/*history* history]
-                                        (t/do-report (history/clojure-test-summary)))
-                                      (catch Throwable t
-                                        (println "Exception in exit (SIGINT/ShutDown) handler")
-                                        (prn t)
-                                        (System/exit 1))))]
-                      ;; Prefer a signal handler, but accept a shutdown hook
-                      (with-shutdown-hook (if (set-signal-handler! "INT" (fn [_]
-                                                                           (on-exit)
-                                                                           (System/exit 1)))
-                                            (fn [])
-                                            on-exit)
-                        (let [test-plan (plugin/run-hook :kaocha.hooks/pre-run test-plan)]
-                          (binding [testable/*test-plan* test-plan]
-                            (let [test-plan-tests (:kaocha.test-plan/tests test-plan)
-                                  result-tests    (testable/run-testables test-plan-tests test-plan)
-                                  result          (plugin/run-hook :kaocha.hooks/post-run
-                                                                   (-> test-plan
-                                                                       (dissoc :kaocha.test-plan/tests)
-                                                                       (assoc :kaocha.result/tests result-tests)))]
-                              (assert (= (count test-plan-tests) (count (:kaocha.result/tests result))))
-                              (-> result
-                                  result/testable-totals
-                                  result/totals->clojure-test-summary
-                                  t/do-report)
-                              result)))))))))))))))
+              ;; The load stage adds directories to the classpath, so at this
+              ;; point all vars that are being bound need to exist, if not we
+              ;; throw.
+              (with-bindings (config/binding-map config :throw-errors)
+                (with-reporter (:kaocha/reporter test-plan)
+                  (let [on-exit (fn []
+                                  (try
+                                    ;; Force reset printing to stdout, since we
+                                    ;; don't know where in the process we've
+                                    ;; been interrupted, output capturing may
+                                    ;; still be in effect.
+                                    (System/setOut
+                                     (java.io.PrintStream.
+                                      (java.io.BufferedOutputStream.
+                                       (java.io.FileOutputStream. java.io.FileDescriptor/out))))
+                                    (binding [history/*history* history]
+                                      (t/do-report (history/clojure-test-summary)))
+                                    (catch Throwable t
+                                      (println "Exception in exit (SIGINT/ShutDown) handler")
+                                      (prn t)
+                                      (System/exit 1))))]
+                    ;; Prefer a signal handler, but accept a shutdown hook
+                    (with-shutdown-hook (if (set-signal-handler! "INT" (fn [_]
+                                                                         (on-exit)
+                                                                         (System/exit 1)))
+                                          (fn [])
+                                          on-exit)
+                      (let [test-plan (plugin/run-hook :kaocha.hooks/pre-run test-plan)]
+                        (binding [testable/*test-plan* test-plan]
+                          (let [test-plan-tests (:kaocha.test-plan/tests test-plan)
+                                result-tests    (testable/run-testables test-plan-tests test-plan)
+                                result          (plugin/run-hook :kaocha.hooks/post-run
+                                                                 (-> test-plan
+                                                                     (dissoc :kaocha.test-plan/tests)
+                                                                     (assoc :kaocha.result/tests result-tests)))]
+                            (assert (= (count test-plan-tests) (count (:kaocha.result/tests result))))
+                            (-> result
+                                result/testable-totals
+                                result/totals->clojure-test-summary
+                                t/do-report)
+                            result))))))))))))))
